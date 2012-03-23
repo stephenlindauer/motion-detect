@@ -13,11 +13,17 @@ def my_range(start, end, step):
         yield start
         start += step
 
-def pix_change(p1, p2, x, y, delta):
-	r = p2[x,y][0] + delta
-	g = p2[x,y][1] + delta
-	b = p2[x,y][2] + delta
-	return (b, g, b)
+def pix_change1(p1, p2, x, y):
+	r = 0 #p2[x,y][0]
+	g = 255
+	b = 0
+	return (r, g, b)
+
+def pix_change2(p1, p2, x, y):
+	r = 0
+	g = 0
+	b = 0
+	return (r, g, b)
 
 file1 = "previous.jpg"
 file2 = "current.jpg"
@@ -52,15 +58,17 @@ while True:
 				diff_count += 1
 	# 			print val1, val2, abs(val1-val2)
 	# 			print x, y
-				pixels2[x,y] = pix_change(pixels1, pixels2, x, y, 100)
+				pixels2[x,y] = pix_change1(pixels1, pixels2, x, y)
 				if (x >= 2 and y >= 2):
-					pixels2[x-2 ,y-2] = pix_change(pixels1, pixels2, x+2, y+2, -100)
+					pixels2[x-2 ,y-2] = pix_change1(pixels1, pixels2, x+2, y+2)
+					pixels2[x ,y-2] = pix_change2(pixels1, pixels2, x, y+2)
+					pixels2[x-2 ,y] = pix_change2(pixels1, pixels2, x+2, y)
 				
 	
 	print 'pixel difference: ', diff_count
 	if diff_count >= 1000:
 		print 'Motion captured'
-		output_file = "diff%s.jpg" % (datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S'))
+		output_file = "%s/Dropbox/motion-detect-captures/diff%s.jpg" % (os.environ['HOME'], datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S'))
 		i2.save(output_file)
 	else:
 		print 'No motion detected'
