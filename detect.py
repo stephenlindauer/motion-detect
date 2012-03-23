@@ -15,7 +15,7 @@ def my_range(start, end, step):
 
 def pix_change1(p1, p2, x, y):
 	r = 0 #p2[x,y][0]
-	g = 255
+	g = 0 #255
 	b = 0
 	return (r, g, b)
 
