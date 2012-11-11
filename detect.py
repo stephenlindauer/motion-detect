@@ -8,6 +8,7 @@ import datetime
 import os
 import cv
 
+REQUIRED_DETECTION=400
 
 def my_range(start, end, step):
     while start<=end:
@@ -34,7 +35,10 @@ last_frame = cv.QueryFrame(capture)
 
 while True:
 
-    cv.WaitKey(1)
+    key = cv.WaitKey(10)
+    if key == 113:
+        break
+        
     frame = cv.QueryFrame(capture)    
     
     display_frame = cv.CreateImage(cv.GetSize(frame), 8, 3)
@@ -65,13 +69,23 @@ while True:
                 
     
     print 'pixel difference: ', diff_count
-    if diff_count >= 1000:
+    
+    BAR_WIDTH = 400
+    color = (0,255,0)    
+    percent = 1.0*diff_count/REQUIRED_DETECTION
+    if percent >= .6:
+        color = (0,255,255)
+    if percent >= 1:
+        percent=1
+        color = (0,0,255)
         print 'Motion captured'
-#         output_file = "%s/Desktop/motion-detect-captures/diff%s.jpg" % (os.environ['HOME'], datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S'))
-#         i2.save(output_file)
-    else:
-        print 'No motion detected'
+        
+        
+    cv.Rectangle(display_frame, (frame.width/2-BAR_WIDTH/2, 690), (frame.width/2+BAR_WIDTH/2, 710), (0,0,0), -1)
+    cv.Rectangle(display_frame, (frame.width/2-BAR_WIDTH/2, 690), (frame.width/2+BAR_WIDTH/2, 710), color)
 
+    cv.Rectangle(display_frame, (frame.width/2-BAR_WIDTH/2, 690), (int(frame.width/2-BAR_WIDTH/2+BAR_WIDTH*percent), 710), color, -1)
+    
     cv.ShowImage("Window", display_frame)
 
     last_frame = cv.CreateImage(cv.GetSize(frame), 8, 3)
