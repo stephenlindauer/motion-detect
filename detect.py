@@ -27,6 +27,10 @@ def pix_change2(p1, p2, x, y):
     b = 0
     return (r, g, b)
 
+frames = []
+recording = False
+inactive_frames = 0
+video_number = 0
 
 capture = cv.CaptureFromCAM(0)
 
@@ -81,6 +85,7 @@ while True:
         print 'Motion captured'
         
         
+        
     cv.Rectangle(display_frame, (frame.width/2-BAR_WIDTH/2, 690), (frame.width/2+BAR_WIDTH/2, 710), (0,0,0), -1)
     cv.Rectangle(display_frame, (frame.width/2-BAR_WIDTH/2, 690), (frame.width/2+BAR_WIDTH/2, 710), color)
 
@@ -91,5 +96,36 @@ while True:
     last_frame = cv.CreateImage(cv.GetSize(frame), 8, 3)
     cv.Copy(frame, last_frame)
     
+    if percent >= 1:
+        
+        if not recording:
+            recording = True
+            video_number += 1
+            writer = cv.CreateVideoWriter("out-%s.avi" % (video_number), cv.CV_FOURCC('M', 'J', 'P', 'G'), 5, cv.GetSize(frame), True)
+
+        if recording:
+            cv.WriteFrame(writer, display_frame)
+            
+    
+    else:
+        if recording:
+            inactive_frames += 1
+            frames.append(frame)
+            if inactive_frames > 20:
+                recording = False
+                inactive_frames = 0                
+                print 'Save video'
+                del writer
+
+
+
+        
+    
 #     k=cv.WaitKey(500)
 #     print k
+
+
+
+
+
+
