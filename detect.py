@@ -23,9 +23,9 @@ def pix_change1(p1, p2, x, y):
 
 def pix_change2(p1, p2, x, y):
     r = 0
-    g = 0
+    g = 120
     b = 0
-    return (r, g, b)
+    return p2[x,y]
 
 frames = []
 recording = False
@@ -95,7 +95,7 @@ while True:
 
     last_frame = cv.CreateImage(cv.GetSize(frame), 8, 3)
     cv.Copy(frame, last_frame)
-    
+
     if percent >= 1:
         
         if not recording:
@@ -110,7 +110,8 @@ while True:
     else:
         if recording:
             inactive_frames += 1
-            frames.append(frame)
+            cv.WriteFrame(writer, display_frame)
+            
             if inactive_frames > 20:
                 recording = False
                 inactive_frames = 0                
