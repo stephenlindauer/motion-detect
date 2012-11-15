@@ -7,11 +7,12 @@ import time
 import datetime
 import os
 import cv
+import sys
 
-REQUIRED_DETECTION=100
-THRESHOLD = 120
+REQUIRED_DETECTION=80
+THRESHOLD = 130
 ALWAYS_SHOW_FRAME = False
-
+RECORD = True
 def my_range(start, end, step):
     while start<=end:
         yield start
@@ -30,8 +31,10 @@ def pix_change2(p1, p2, x, y):
     return p2[x,y]
 
 def show_frame(frame):
-    
-    cv.ShowImage("Window", frame)
+#     size = cv.GetSize(frame)
+#     small = cv.CreateImage((size[0] / 4, size[1] / 4), frame.depth, frame.nChannels)
+#     cv.Resize(frame, small)
+    cv.ShowImage(WINDOW_NAME, frame)
 
 
 frames = []
@@ -39,14 +42,22 @@ recording = False
 inactive_frames = 0
 video_number = 0
 
-capture = cv.CaptureFromCAM(1)
+CAM_INDEX = 0
+if len(sys.argv) > 1:
+    CAM_INDEX = int(sys.argv[1])
+capture = cv.CaptureFromCAM(CAM_INDEX)
+
+WINDOW_NAME = "Window-%s" % CAM_INDEX
 
 last_frame = cv.QueryFrame(capture)
 
 
 while True:
 
-    key = cv.WaitKey(10)
+    if recording:
+        key = cv.WaitKey(10)
+    else:
+        key = cv.WaitKey(500)
     if key == 113:
         break
         
@@ -61,8 +72,8 @@ while True:
     
     diff_count = 0
     
-    for y in my_range(0,frame.width-1, 4):
-        for x in my_range(0, frame.height-1, 4):
+    for y in my_range(0,frame.width-1, 5):
+        for x in my_range(0, frame.height-1, 5):
             red_diff = abs(pixels1[x,y][0] - pixels2[x,y][0])
             green_diff = abs(pixels1[x,y][0] - pixels2[x,y][0])
             blue_diff = abs(pixels1[x,y][0] - pixels2[x,y][0])
@@ -104,15 +115,18 @@ while True:
         if not recording:
             recording = True
             video_number += 1
-            writer = cv.CreateVideoWriter("out-%s.avi" % (video_number), cv.CV_FOURCC('M', 'J', 'P', 'G'), 5, cv.GetSize(frame), True)
+            if RECORD:
+                writer = cv.CreateVideoWriter("out-%s.avi" % (video_number), cv.CV_FOURCC('M', 'J', 'P', 'G'), 5, cv.GetSize(frame), True)
             
-            cv.NamedWindow("Window", flags=cv.CV_WINDOW_NORMAL)
-            cv.MoveWindow("Window", 2500, 20)
-            
-        if recording:
+            print cv.NamedWindow(WINDOW_NAME, flags=cv.CV_WINDOW_NORMAL)
+            cv.MoveWindow(WINDOW_NAME, 2500, 20)
+
+        show_frame(display_frame) 
+  
+        if RECORD and recording:
             cv.WriteFrame(writer, display_frame)
         
-        show_frame(display_frame) 
+        inactive_frames = 0
     
     else:
 
@@ -120,19 +134,19 @@ while True:
             show_frame(display_frame)
             
             inactive_frames += 1
-            cv.WriteFrame(writer, display_frame)
+            if RECORD:
+                cv.WriteFrame(writer, display_frame)
             
             if inactive_frames > 20:
                 recording = False
-                inactive_frames = 0                
-                print 'Save video'
-                del writer
+                inactive_frames = 0
+                if RECORD:                
+                    print 'Save video'
+                    del writer
                 
-                cv.DestroyWindow("Window")
+                cv.DestroyWindow(WINDOW_NAME)
+#                 cv.ResizeWindow(WINDOW_NAME, 200, 120)
 
-
-
-        
     
 #     k=cv.WaitKey(500)
 #     print k
