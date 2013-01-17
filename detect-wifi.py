@@ -45,7 +45,8 @@ video_number = 0
 CAM_INDEX = 0
 if len(sys.argv) > 1:
     CAM_INDEX = int(sys.argv[1])
-capture = cv.CaptureFromCAM(CAM_INDEX)
+#capture = cv.CaptureFromCAM(CAM_INDEX)
+capture = cv.CaptureFromFile("http://192.168.10.195:81/videostream.asf?user=admin&pwd=sdlyr8")
 
 WINDOW_NAME = "Window-%s" % CAM_INDEX
 
@@ -116,8 +117,7 @@ while True:
             recording = True
             video_number += 1
             if RECORD:
-                writer = cv.CreateVideoWriter("out-%s.avi" % (video_number), cv.CV_FOURCC('M', 'J', 'P', 'G'), 5, cv.GetSize(frame), True)
-                # Save video to Sentry-webapp here
+                writer = cv.CreateVideoWriter("wifi-out-%s.avi" % (video_number), cv.CV_FOURCC('M', 'J', 'P', 'G'), 5, cv.GetSize(frame), True)
             
             print cv.NamedWindow(WINDOW_NAME, flags=cv.CV_WINDOW_NORMAL)
             cv.MoveWindow(WINDOW_NAME, 2500, 20)
