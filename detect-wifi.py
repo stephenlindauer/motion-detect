@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import Image, ImageDraw
 import math
 from subprocess import call
@@ -8,6 +6,9 @@ import datetime
 import os
 import cv
 import sys
+
+from urllib2 import urlopen
+
 
 REQUIRED_DETECTION=80
 THRESHOLD = 130
@@ -117,7 +118,15 @@ while True:
             recording = True
             video_number += 1
             if RECORD:
-                writer = cv.CreateVideoWriter("wifi-out-%s.avi" % (video_number), cv.CV_FOURCC('M', 'J', 'P', 'G'), 5, cv.GetSize(frame), True)
+                file_name = "bedroom-%s.avi" % (datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d-%H%M%S"))
+                writer = cv.CreateVideoWriter(file_name, cv.CV_FOURCC('M', 'J', 'P', 'G'), 5, cv.GetSize(frame), True)
+                
+                # Save video to Sentry-webapp here
+                try:
+                    urlopen('http://localhost:4663/api/videos/new/?camera=%s&file_name=%s' % ('Bedroom', file_name))
+                except:
+                    print 'Could not save new video file'
+                    
             
             print cv.NamedWindow(WINDOW_NAME, flags=cv.CV_WINDOW_NORMAL)
             cv.MoveWindow(WINDOW_NAME, 2500, 20)

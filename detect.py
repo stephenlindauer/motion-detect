@@ -9,6 +9,9 @@ import os
 import cv
 import sys
 
+from urllib2 import urlopen
+
+
 REQUIRED_DETECTION=80
 THRESHOLD = 130
 ALWAYS_SHOW_FRAME = False
@@ -116,8 +119,14 @@ while True:
             recording = True
             video_number += 1
             if RECORD:
-                writer = cv.CreateVideoWriter("out-%s.avi" % (video_number), cv.CV_FOURCC('M', 'J', 'P', 'G'), 5, cv.GetSize(frame), True)
+                file_name = "office-%s.avi" % (datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d-%H%M%S"))
+                writer = cv.CreateVideoWriter(file_name, cv.CV_FOURCC('M', 'J', 'P', 'G'), 5, cv.GetSize(frame), True)
+                
                 # Save video to Sentry-webapp here
+                try:
+                    urlopen('http://localhost:4663/api/videos/new/?camera=%s&file_name=%s' % ('Office', file_name))
+                except:
+                    print 'Could not save new video file'
             
             print cv.NamedWindow(WINDOW_NAME, flags=cv.CV_WINDOW_NORMAL)
             cv.MoveWindow(WINDOW_NAME, 2500, 20)
