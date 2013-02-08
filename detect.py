@@ -129,7 +129,7 @@ while True:
                     print 'Could not save new video file'
             
             print cv.NamedWindow(WINDOW_NAME, flags=cv.CV_WINDOW_NORMAL)
-            cv.MoveWindow(WINDOW_NAME, 2500, 20)
+            cv.MoveWindow(WINDOW_NAME, 400, 20)
 
         show_frame(display_frame) 
   

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import Image, ImageDraw
 import math
 from subprocess import call
@@ -6,8 +8,13 @@ import datetime
 import os
 import cv
 import sys
+import argparse
 
 from urllib2 import urlopen
+
+parser = argparse.ArgumentParser(description='Start a webcam feed and monitor activity.')
+parser.add_argument("--wifi", action="store_true", default=False)
+args = parser.parse_args()
 
 
 REQUIRED_DETECTION=80
@@ -43,13 +50,20 @@ recording = False
 inactive_frames = 0
 video_number = 0
 
-CAM_INDEX = 0
-if len(sys.argv) > 1:
-    CAM_INDEX = int(sys.argv[1])
-#capture = cv.CaptureFromCAM(CAM_INDEX)
-capture = cv.CaptureFromFile("http://192.168.10.195:81/videostream.asf?user=admin&pwd=sdlyr8")
+capture = None
+WINDOW_NAME = None
 
-WINDOW_NAME = "Window-%s" % CAM_INDEX
+if args.wifi:
+    capture = cv.CaptureFromFile("http://192.168.10.195:81/videostream.asf?user=admin&pwd=sdlyr8")
+    WINDOW_NAME = "Bedroom"
+else:
+    
+    CAM_INDEX = 0
+    if len(sys.argv) > 1:
+        CAM_INDEX = int(sys.argv[1])
+    capture = cv.CaptureFromCAM(CAM_INDEX)
+
+    WINDOW_NAME = "Window-%s" % CAM_INDEX
 
 last_frame = cv.QueryFrame(capture)
 
@@ -118,18 +132,17 @@ while True:
             recording = True
             video_number += 1
             if RECORD:
-                file_name = "bedroom-%s.avi" % (datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d-%H%M%S"))
+                file_name = "office-%s.avi" % (datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d-%H%M%S"))
                 writer = cv.CreateVideoWriter(file_name, cv.CV_FOURCC('M', 'J', 'P', 'G'), 5, cv.GetSize(frame), True)
                 
                 # Save video to Sentry-webapp here
                 try:
-                    urlopen('http://localhost:4663/api/videos/new/?camera=%s&file_name=%s' % ('Bedroom', file_name))
+                    urlopen('http://localhost:4663/api/videos/new/?camera=%s&file_name=%s' % ('Office', file_name))
                 except:
                     print 'Could not save new video file'
-                    
             
             print cv.NamedWindow(WINDOW_NAME, flags=cv.CV_WINDOW_NORMAL)
-            cv.MoveWindow(WINDOW_NAME, 20, 20)
+            cv.MoveWindow(WINDOW_NAME, 2500, 20)
 
         show_frame(display_frame) 
   
